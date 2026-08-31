@@ -2,7 +2,7 @@
 title: "m1: Generator and data"
 label: wayfinder:task
 status: open
-assignee:
+assignee: ignas
 map: ../../../portfolio/tracker/map-pixel-atlas.md
 blocked-by: []
 ---
