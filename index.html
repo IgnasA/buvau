@@ -4,30 +4,161 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Buvau</title>
+    <meta name="description" content="A world map drawn from memory — 45 visited countries, redrawn on every visit." />
+    <link rel="canonical" href="https://buvau.ausiejus.lt/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content="Buvau" />
+    <meta property="og:description" content="A world map drawn from memory — 45 visited countries, redrawn on every visit." />
+    <meta property="og:url" content="https://buvau.ausiejus.lt/" />
+    <meta property="og:image" content="https://buvau.ausiejus.lt/og.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Before first paint: honor a remembered scheme choice, no flash.
+      (function () {
+        try {
+          var s = localStorage.getItem('buvau-scheme');
+          if (s === 'pencil' || s === 'chalk') document.documentElement.dataset.scheme = s;
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" />
     <style>
-      /* Structural only — the page's real chrome lands in m4. */
-      body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-      main { width: 100%; }
-      .map-frame { width: 100%; max-width: 1032px; margin: 0 auto; padding: 16px; box-sizing: border-box; }
-      canvas { display: block; max-width: 100%; }
-      .readout { font: 14px/1.5 ui-monospace, monospace; min-height: 1.5em; text-align: center; }
-      canvas:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
-      .sr-only {
-        position: absolute; width: 1px; height: 1px; margin: -1px;
-        clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+      /* Pencil (paper) is the base scheme; chalk (board) wins under a
+         dark system preference unless the toggle pinned pencil, and
+         always when the toggle pinned chalk. */
+      :root {
+        --page: #fbfaf6;
+        --ink: #26323a;
+        --secondary: #5b6670;
+        --serif: "Newsreader", Georgia, "Times New Roman", serif;
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
       }
-      .noscript { max-width: 1000px; margin: 0 auto; padding: 16px; font: 14px/1.5 ui-monospace, monospace; }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-scheme='pencil']) {
+          --page: #191b1f;
+          --ink: #e9e5d7;
+          --secondary: #a8a496;
+        }
+      }
+      :root[data-scheme='chalk'] {
+        --page: #191b1f;
+        --ink: #e9e5d7;
+        --secondary: #a8a496;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--page);
+        color: var(--ink);
+        font-family: var(--serif);
+      }
+      header {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 9vh 24px 2vh;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      h1 {
+        font: 400 44px/1.1 var(--serif);
+        margin: 0 0 12px;
+        letter-spacing: 0.01em;
+        text-wrap: balance;
+      }
+      .intro {
+        font: 400 18px/1.55 var(--serif);
+        margin: 0;
+        color: var(--secondary);
+      }
+      .scheme-toggle {
+        all: unset;
+        cursor: pointer;
+        font: 500 12px/1 var(--mono);
+        letter-spacing: 0.06em;
+        color: var(--secondary);
+        border: 1px solid color-mix(in srgb, var(--secondary) 40%, transparent);
+        border-radius: 999px;
+        padding: 6px 12px;
+        margin-top: 16px;
+        display: inline-block;
+      }
+      .scheme-toggle:hover { color: var(--ink); }
+      .scheme-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+      main { width: 100%; flex: 1; }
+      .map-frame {
+        width: 100%;
+        max-width: 1032px;
+        margin: 0 auto;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+      canvas {
+        display: block;
+        max-width: 100%;
+        aspect-ratio: 1000 / 490; /* reserved before JS sizes it: CLS 0 */
+        margin: 0 auto;
+      }
+      canvas:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+      .readout {
+        font: italic 400 15px/1.5 var(--serif);
+        color: var(--secondary);
+        min-height: 1.5em;
+        text-align: center;
+        margin: 8px 0 0;
+      }
+      footer {
+        font: 400 13px/1.5 var(--mono);
+        color: var(--secondary);
+        text-align: center;
+        padding: 2vh 24px 5vh;
+      }
+      footer a { color: inherit; }
+      footer a:hover, footer a:focus-visible { color: var(--ink); }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        clip-path: inset(50%);
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .noscript {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 16px;
+      }
       .noscript img { width: 100%; height: auto; display: block; }
+      .noscript p { font: italic 400 15px/1.5 var(--serif); color: var(--secondary); text-align: center; }
     </style>
   </head>
   <body>
+    <header>
+      <h1>Buvau</h1>
+      <p class="intro"><i>buvau</i> — Lithuanian: &ldquo;I have been.&rdquo; Forty&#8209;five
+      countries, drawn from real geography the way memory draws it: simplified,
+      a little wrong, redrawn on every visit.</p>
+      <button class="scheme-toggle" id="scheme-toggle" hidden>◐ chalk</button>
+    </header>
     <noscript>
       <div class="noscript">
         <img src="/snapshot.svg" alt="A hand-drawn world map; 45 visited countries are inked and hatched, the rest are faint pencil." />
-        <p>buvau — Lithuanian: &ldquo;I have been&rdquo;. 45 of 176 countries. With JavaScript, this drawing is redrawn from memory on every visit.</p>
+        <p>This is one fixed drawing. With JavaScript, the map is redrawn from
+        memory on every visit — and you can zoom into it.</p>
       </div>
     </noscript>
     <main id="app"></main>
+    <footer>
+      <a href="https://github.com/IgnasA/buvau">source</a> · <a href="https://ausiejus.lt">ausiejus.lt</a>
+    </footer>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

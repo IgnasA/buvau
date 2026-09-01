@@ -1,12 +1,12 @@
 /**
  * Composition root: fit the world, pick the medium, seed this visit's
- * drawing, and wire the three interactions the map allows — hover/tap to
- * the readout line, zoom, pan. Page chrome (header, footer, the scheme
- * toggle's UI) lands in m4; this file already draws both media.
+ * drawing, and wire what the page allows — hover/tap to the readout
+ * line, zoom, pan, and the scheme toggle that redraws the world in the
+ * other medium.
  */
 import outlinesJson from './outlines.json';
 import { fitToViewport, hitTest, type Outline } from './geometry.ts';
-import { drawScene, MEDIA, type Medium, type Scene } from './draw.ts';
+import { drawScene, type Medium, type Scene } from './draw.ts';
 import { Viewport } from './viewport.ts';
 
 const outlines = outlinesJson as Outline[];
@@ -29,19 +29,50 @@ const canvas = document.querySelector<HTMLCanvasElement>('#map')!;
 const readout = document.querySelector<HTMLParagraphElement>('.readout')!;
 const ctx = canvas.getContext('2d')!;
 
+// ---- scheme: pencil on paper / chalk on board -----------------------------
+// The <head> script applied any remembered choice before paint; CSS owns
+// the page colors. This code only keeps the canvas medium and the toggle
+// label in step with the same state.
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
-let medium: Medium = darkScheme.matches ? 'chalk' : 'pencil';
-darkScheme.addEventListener('change', (e) => {
-  medium = e.matches ? 'chalk' : 'pencil';
+const toggle = document.querySelector<HTMLButtonElement>('#scheme-toggle')!;
+
+function currentMedium(): Medium {
+  const pinned = document.documentElement.dataset['scheme'];
+  if (pinned === 'pencil' || pinned === 'chalk') return pinned;
+  return darkScheme.matches ? 'chalk' : 'pencil';
+}
+
+function syncToggleLabel(): void {
+  const other = currentMedium() === 'pencil' ? 'chalk' : 'pencil';
+  toggle.textContent = `◐ ${other}`;
+  toggle.setAttribute('aria-label', `Redraw the map in ${other}`);
+}
+
+toggle.hidden = false;
+toggle.addEventListener('click', () => {
+  const next = currentMedium() === 'pencil' ? 'chalk' : 'pencil';
+  document.documentElement.dataset['scheme'] = next;
+  try {
+    localStorage.setItem('buvau-scheme', next);
+  } catch {
+    // private mode: the choice just doesn't stick
+  }
+  syncToggleLabel();
   render();
 });
+darkScheme.addEventListener('change', () => {
+  syncToggleLabel();
+  render();
+});
+syncToggleLabel();
 
+// ---- drawing --------------------------------------------------------------
 const viewport = new Viewport();
 let scene: Scene | null = null;
 
 function render(): void {
   const frame = canvas.parentElement!;
-  const width = Math.min(1000, frame.clientWidth);
+  const width = Math.min(1000, frame.clientWidth - 32);
   const aspect = 0.49; // Equal Earth's frame, Antarctica already gone
   const height = Math.round(width * aspect);
   const dpr = window.devicePixelRatio || 1;
@@ -56,14 +87,12 @@ function render(): void {
   scene = {
     countries: fitToViewport(outlines, width, height),
     outlines,
-    medium,
+    medium: currentMedium(),
     seed,
     weight,
     microDiameter: 8 * weight,
     transform: viewport.transform,
   };
-  document.body.style.background = MEDIA[medium].page;
-  document.body.style.color = MEDIA[medium].ink;
   drawScene(ctx, scene, width, height);
 }
 

@@ -2,7 +2,7 @@
 title: "m4: Page chrome and launch"
 label: wayfinder:task
 status: open
-assignee:
+assignee: ignas
 map: ../../../portfolio/tracker/map-pixel-atlas.md
 blocked-by: [3]
 ---
