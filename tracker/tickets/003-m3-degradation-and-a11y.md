@@ -1,7 +1,7 @@
 ---
 title: "m3: Degradation and accessibility"
 label: wayfinder:task
-status: open
+status: closed
 assignee: ignas
 map: ../../../portfolio/tracker/map-pixel-atlas.md
 blocked-by: [2]
@@ -24,3 +24,28 @@ The fallback is the baseline:
 
 Done when the page with JS disabled is complete and beautiful, and a
 screen-reader pass reads name, translation, count, and the country list.
+
+## Resolution
+
+Shipped and pushed:
+
+- `generate/snapshot.ts` (`npm run snapshot`) renders the fixed-seed
+  pencil-ghost drawing as `public/snapshot.svg` (102 KB, no-JS visitors
+  only) and rasterizes `public/og.png` (152 KB, 1200×630) via resvg.
+  Seed 20260831 — the day the visited list was transcribed; that one
+  drawing is pinned while the live page redraws per visit. A shared
+  `src/curve.ts` gives the SVG and the canvas the same Catmull-Rom hand;
+  hatching becomes an SVG pattern.
+- `<noscript>` serves the snapshot with alt text and the count line — a
+  complete page, not an apology.
+- sr-only visited-countries list (45 items) beside the canvas; canvas is
+  `role="img"` with a descriptive label that also teaches the keys.
+- Canvas is focusable (visible focus ring): `+`/`−` zoom at center,
+  arrows pan, Escape resets — verified live alongside wheel/drag.
+- Reduced motion: nothing animates by design; nothing to gate.
+
+Caveats recorded honestly: touch verified via pointer emulation only — a
+real-phone pass rides with m4's quality-bar measurement; m4 must also add
+the `og:image` meta tags pointing at og.png.
+
+m4 (page chrome and launch) is unblocked.
