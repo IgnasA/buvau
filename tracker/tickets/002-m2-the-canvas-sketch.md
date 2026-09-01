@@ -2,7 +2,7 @@
 title: "m2: The canvas sketch"
 label: wayfinder:task
 status: open
-assignee:
+assignee: ignas
 map: ../../../portfolio/tracker/map-pixel-atlas.md
 blocked-by: [1]
 ---
