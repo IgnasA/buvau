@@ -11,9 +11,22 @@
       .map-frame { width: 100%; max-width: 1032px; margin: 0 auto; padding: 16px; box-sizing: border-box; }
       canvas { display: block; max-width: 100%; }
       .readout { font: 14px/1.5 ui-monospace, monospace; min-height: 1.5em; text-align: center; }
+      canvas:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; margin: -1px;
+        clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+      }
+      .noscript { max-width: 1000px; margin: 0 auto; padding: 16px; font: 14px/1.5 ui-monospace, monospace; }
+      .noscript img { width: 100%; height: auto; display: block; }
     </style>
   </head>
   <body>
+    <noscript>
+      <div class="noscript">
+        <img src="/snapshot.svg" alt="A hand-drawn world map; 45 visited countries are inked and hatched, the rest are faint pencil." />
+        <p>buvau — Lithuanian: &ldquo;I have been&rdquo;. 45 of 176 countries. With JavaScript, this drawing is redrawn from memory on every visit.</p>
+      </div>
+    </noscript>
     <main id="app"></main>
     <script type="module" src="/src/main.ts"></script>
   </body>

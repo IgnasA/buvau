@@ -2,7 +2,7 @@
 title: "m3: Degradation and accessibility"
 label: wayfinder:task
 status: open
-assignee:
+assignee: ignas
 map: ../../../portfolio/tracker/map-pixel-atlas.md
 blocked-by: [2]
 ---

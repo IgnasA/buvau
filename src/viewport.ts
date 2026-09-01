@@ -119,5 +119,43 @@ export class Viewport {
       this.reset();
       onChange();
     });
+
+    // Keyboard: the canvas is focusable; + / − zoom at center, arrows
+    // pan, Escape backs all the way out.
+    canvas.tabIndex = 0;
+    canvas.addEventListener('keydown', (e) => {
+      const cx = this.width / 2;
+      const cy = this.height / 2;
+      const pan = 48;
+      switch (e.key) {
+        case '+':
+        case '=':
+          this.zoomAt(cx, cy, 1.3);
+          break;
+        case '-':
+        case '_':
+          this.zoomAt(cx, cy, 1 / 1.3);
+          break;
+        case 'ArrowLeft':
+          this.panBy(pan, 0);
+          break;
+        case 'ArrowRight':
+          this.panBy(-pan, 0);
+          break;
+        case 'ArrowUp':
+          this.panBy(0, pan);
+          break;
+        case 'ArrowDown':
+          this.panBy(0, -pan);
+          break;
+        case 'Escape':
+          this.reset();
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      onChange();
+    });
   }
 }

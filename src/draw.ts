@@ -4,6 +4,7 @@
  * in chalk on a board. One function draws a whole scene in either.
  */
 import type { Bbox, FittedCountry, Point } from './geometry.ts';
+import { closedCurve } from './curve.ts';
 import { createRng, wobble } from './wobble.ts';
 import type { Outline } from './geometry.ts';
 
@@ -30,26 +31,14 @@ export interface Scene {
 
 /** Closed Catmull-Rom through the wobbled points — the pen never lifts. */
 function ringPath(ctx: CanvasRenderingContext2D, points: Point[], tension: number): void {
-  const n = points.length;
   ctx.beginPath();
-  if (n < 3) {
-    if (n > 0) ctx.arc(points[0]![0], points[0]![1], 2, 0, Math.PI * 2);
+  if (points.length < 3) {
+    if (points.length > 0) ctx.arc(points[0]![0], points[0]![1], 2, 0, Math.PI * 2);
     return;
   }
   ctx.moveTo(points[0]![0], points[0]![1]);
-  for (let i = 0; i < n; i++) {
-    const p0 = points[(i - 1 + n) % n]!;
-    const p1 = points[i]!;
-    const p2 = points[(i + 1) % n]!;
-    const p3 = points[(i + 2) % n]!;
-    ctx.bezierCurveTo(
-      p1[0] + ((p2[0] - p0[0]) / 6) * tension,
-      p1[1] + ((p2[1] - p0[1]) / 6) * tension,
-      p2[0] - ((p3[0] - p1[0]) / 6) * tension,
-      p2[1] - ((p3[1] - p1[1]) / 6) * tension,
-      p2[0],
-      p2[1],
-    );
+  for (const { c1, c2, to } of closedCurve(points, tension)) {
+    ctx.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], to[0], to[1]);
   }
   ctx.closePath();
 }

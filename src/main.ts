@@ -14,11 +14,15 @@ const outlines = outlinesJson as Outline[];
 // The per-visit seed: reload, and the world is drawn again from memory.
 const seed = Math.floor(Math.random() * 2 ** 31);
 
+const visitedNames = outlines.filter((o) => o.visited).map((o) => o.name);
 const app = document.querySelector('#app')!;
 app.innerHTML = `
   <div class="map-frame">
-    <canvas id="map" aria-label="A hand-drawn world map of visited countries"></canvas>
+    <canvas id="map" role="img" aria-label="A hand-drawn world map. ${visitedNames.length} visited countries are inked and hatched; the rest are faint pencil. Zoom with plus and minus, pan with arrow keys, Escape resets."></canvas>
     <p class="readout" aria-live="polite">·</p>
+    <section class="sr-only" aria-label="Visited countries">
+      <ul>${visitedNames.map((name) => `<li>${name}</li>`).join('')}</ul>
+    </section>
   </div>
 `;
 const canvas = document.querySelector<HTMLCanvasElement>('#map')!;

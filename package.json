@@ -6,9 +6,11 @@
     "dev": "vite",
     "build": "vite build",
     "generate": "node generate/generate.ts",
+    "snapshot": "node generate/snapshot.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/d3-geo": "^3.1.0",
     "@types/geojson": "^7946.0.14",
     "@types/node": "^26.4.0",
