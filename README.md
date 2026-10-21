@@ -11,4 +11,48 @@ algorithm, and the drawing is re-seeded for every viewer.
 Live at [buvau.ausiejus.lt](https://buvau.ausiejus.lt) (once shipped).
 Planned on the wayfinder map in
 [portfolio/tracker/map-pixel-atlas.md](../portfolio/tracker/map-pixel-atlas.md);
-build tickets live in [tracker/](tracker/README.md).
+build tickets live in [tracker/](tracker/README.md). Terms are defined in
+[CONTEXT.md](CONTEXT.md).
+
+## Stack
+
+TypeScript, Vite 7, `d3-geo` + `topojson-client` over `world-atlas`
+geometry, `@resvg/resvg-js` for snapshots. No runtime dependencies: the
+page is a static bundle.
+
+## Setup
+
+Requires Node 22+ (the generate scripts run `.ts` files directly with Node).
+
+```sh
+npm ci
+```
+
+## Run
+
+```sh
+npm run dev        # Vite dev server
+npm run generate   # rebuild src/outlines.json from world-atlas (generate/generate.ts)
+npm run snapshot   # render a PNG snapshot of the drawing (generate/snapshot.ts)
+```
+
+The list of visited countries is in [data/visited.ts](data/visited.ts).
+
+## Test
+
+There is no test suite or linter yet. The checks are:
+
+```sh
+npm run typecheck  # tsc --noEmit (strict)
+npm run build      # vite build
+```
+
+## Deploy
+
+`npm run build` emits a static site to `dist/`, deployed to Vercel with the
+domain `buvau.ausiejus.lt` (provisioning is tracked in the portfolio
+repo's ticket 019).
+
+## Environment variables
+
+None. The project reads no environment variables.
