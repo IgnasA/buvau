@@ -40,12 +40,21 @@ The list of visited countries is in [data/visited.ts](data/visited.ts).
 
 ## Test
 
-There is no test suite or linter yet. The checks are:
+There is no linter yet. The checks are:
 
 ```sh
+npm test           # node:test unit tests in test/ (Node runs the .ts directly)
 npm run typecheck  # tsc --noEmit (strict)
 npm run build      # vite build
 ```
+
+## Using the map
+
+Hover a country with the mouse, or tap it on a touchscreen, and the
+readout line under the map names it. From the keyboard, Tab onto the map:
+a small mark appears at its center, `+`/`−` zoom, the arrow keys pan, and
+the readout names the country under the mark (Escape resets the view).
+Double-click resets the zoom too.
 
 ## Deploy
 
