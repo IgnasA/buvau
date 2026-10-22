@@ -42,18 +42,24 @@ The list of visited countries is in [data/visited.ts](data/visited.ts).
 
 ## Test
 
-There is no test suite or linter yet. The checks are:
+There is no linter yet. The checks are:
 
 ```sh
 npm run typecheck  # tsc --noEmit (strict)
 npm run build      # vite build
+npm test           # build, then check vercel.json's CSP and security headers
 ```
+
+The CSP in [vercel.json](vercel.json) allows the inline `<script>` and
+`<style>` in `index.html` by hash. If you edit either, `npm test` fails and
+prints the new hash to paste in. See
+[docs/SECURITY_REVIEW.md](docs/SECURITY_REVIEW.md).
 
 ## Deploy
 
 `npm run build` emits a static site to `dist/`, deployed to Vercel with the
 domain `buvau.ausiejus.lt` (provisioning is tracked in the portfolio
-repo's ticket 019).
+repo's ticket 019). Security headers are set in `vercel.json`.
 
 ## Environment variables
 
