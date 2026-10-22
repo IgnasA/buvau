@@ -16,18 +16,33 @@ const outlines = outlinesJson as Outline[];
 const seed = Math.floor(Math.random() * 2 ** 31);
 
 const visitedNames = outlines.filter((o) => o.visited).map((o) => o.name);
-const app = document.querySelector('#app')!;
-app.innerHTML = `
-  <div class="map-frame">
-    <canvas id="map" role="img" aria-label="A hand-drawn world map. ${visitedNames.length} visited countries are inked and hatched; the rest are faint pencil. Zoom with plus and minus, pan with arrow keys, Escape resets; the country under the center mark is named below the map."></canvas>
-    <p class="readout" aria-live="polite">${QUIET}</p>
-    <section class="sr-only" aria-label="Visited countries">
-      <ul>${visitedNames.map((name) => `<li>${name}</li>`).join('')}</ul>
-    </section>
-  </div>
-`;
-const canvas = document.querySelector<HTMLCanvasElement>('#map')!;
-const readout = document.querySelector<HTMLParagraphElement>('.readout')!;
+// Built with DOM calls, not an innerHTML template: country names are data
+// and go in as text, never parsed as markup.
+const frameEl = document.createElement('div');
+frameEl.className = 'map-frame';
+const canvas = document.createElement('canvas');
+canvas.id = 'map';
+canvas.setAttribute('role', 'img');
+canvas.setAttribute(
+  'aria-label',
+  `A hand-drawn world map. ${visitedNames.length} visited countries are inked and hatched; the rest are faint pencil. Zoom with plus and minus, pan with arrow keys, Escape resets; the country under the center mark is named below the map.`,
+);
+const readout = document.createElement('p');
+readout.className = 'readout';
+readout.setAttribute('aria-live', 'polite');
+readout.textContent = QUIET;
+const visitedList = document.createElement('section');
+visitedList.className = 'sr-only';
+visitedList.setAttribute('aria-label', 'Visited countries');
+const list = document.createElement('ul');
+for (const name of visitedNames) {
+  const item = document.createElement('li');
+  item.textContent = name;
+  list.append(item);
+}
+visitedList.append(list);
+frameEl.append(canvas, readout, visitedList);
+document.querySelector('#app')!.append(frameEl);
 const ctx = canvas.getContext('2d')!;
 
 // ---- scheme: pencil on paper / chalk on board -----------------------------
