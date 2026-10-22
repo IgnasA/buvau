@@ -1,5 +1,7 @@
 # buvau
 
+[![CI](https://github.com/IgnasA/buvau/actions/workflows/ci.yml/badge.svg)](https://github.com/IgnasA/buvau/actions/workflows/ci.yml)
+
 *buvau* — Lithuanian: "I have been."
 
 A world map drawn the way memory draws it: simplified, a little wrong,
