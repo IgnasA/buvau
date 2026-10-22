@@ -191,3 +191,25 @@ export function drawScene(ctx: CanvasRenderingContext2D, scene: Scene, width: nu
     }
   });
 }
+
+/**
+ * The keyboard's aim: a small pencilled ring with four ticks at the
+ * map's center, drawn only while the keyboard is steering. Fixed size in
+ * CSS px — it is a cursor, not part of the drawing.
+ */
+export function drawAim(ctx: CanvasRenderingContext2D, medium: Medium, center: Point): void {
+  const [x, y] = center;
+  ctx.save();
+  ctx.strokeStyle = MEDIA[medium].ink;
+  ctx.lineWidth = 1.25;
+  ctx.lineCap = 'round';
+  ctx.globalAlpha = 0.9;
+  ctx.beginPath();
+  ctx.arc(x, y, 6, 0, Math.PI * 2);
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+    ctx.moveTo(x + dx * 9, y + dy * 9);
+    ctx.lineTo(x + dx * 13, y + dy * 13);
+  }
+  ctx.stroke();
+  ctx.restore();
+}

@@ -1,12 +1,13 @@
 /**
  * Composition root: fit the world, pick the medium, seed this visit's
- * drawing, and wire what the page allows — hover/tap to the readout
- * line, zoom, pan, and the scheme toggle that redraws the world in the
- * other medium.
+ * drawing, and wire what the page allows — hover, tap and keyboard aim
+ * to the readout line, zoom, pan, and the scheme toggle that redraws the
+ * world in the other medium.
  */
 import outlinesJson from './outlines.json';
-import { fitToViewport, hitTest, type Outline } from './geometry.ts';
-import { drawScene, type Medium, type Scene } from './draw.ts';
+import { fitToViewport, type Outline, type Point } from './geometry.ts';
+import { drawAim, drawScene, type Medium, type Scene } from './draw.ts';
+import { QUIET, readoutAt } from './readout.ts';
 import { Viewport } from './viewport.ts';
 
 const outlines = outlinesJson as Outline[];
@@ -24,12 +25,12 @@ canvas.id = 'map';
 canvas.setAttribute('role', 'img');
 canvas.setAttribute(
   'aria-label',
-  `A hand-drawn world map. ${visitedNames.length} visited countries are inked and hatched; the rest are faint pencil. Zoom with plus and minus, pan with arrow keys, Escape resets.`,
+  `A hand-drawn world map. ${visitedNames.length} visited countries are inked and hatched; the rest are faint pencil. Zoom with plus and minus, pan with arrow keys, Escape resets; the country under the center mark is named below the map.`,
 );
 const readout = document.createElement('p');
 readout.className = 'readout';
 readout.setAttribute('aria-live', 'polite');
-readout.textContent = '·';
+readout.textContent = QUIET;
 const visitedList = document.createElement('section');
 visitedList.className = 'sr-only';
 visitedList.setAttribute('aria-label', 'Visited countries');
@@ -84,6 +85,22 @@ syncToggleLabel();
 // ---- drawing --------------------------------------------------------------
 const viewport = new Viewport();
 let scene: Scene | null = null;
+// True while the keyboard is steering: the center mark shows and the
+// readout names whatever sits under it. Any pointer or blur hands back.
+let aiming = false;
+
+function center(): Point {
+  return [canvas.clientWidth / 2, canvas.clientHeight / 2];
+}
+
+function paint(): void {
+  if (!scene) return;
+  drawScene(ctx, scene, canvas.clientWidth, canvas.clientHeight);
+  if (aiming) {
+    drawAim(ctx, scene.medium, center());
+    readout.textContent = readoutAt(scene, viewport, center());
+  }
+}
 
 function render(): void {
   const frame = canvas.parentElement!;
@@ -108,29 +125,39 @@ function render(): void {
     microDiameter: 8 * weight,
     transform: viewport.transform,
   };
-  drawScene(ctx, scene, width, height);
+  paint();
+}
+
+function stopAiming(): void {
+  if (!aiming) return;
+  aiming = false;
+  paint();
 }
 
 canvas.addEventListener('pointermove', (e) => {
+  stopAiming();
   if (!scene || viewport.gesturing) return;
   const rect = canvas.getBoundingClientRect();
-  const point = viewport.invert([e.clientX - rect.left, e.clientY - rect.top]);
-  const index = hitTest(
-    scene.countries,
-    point,
-    scene.microDiameter / viewport.k,
-    8 / viewport.k,
-  );
-  if (index === null) {
-    readout.textContent = '·';
-    return;
-  }
-  const country = outlines[index]!;
-  readout.textContent = country.visited ? `${country.name} — visited` : country.name;
+  readout.textContent = readoutAt(scene, viewport, [e.clientX - rect.left, e.clientY - rect.top]);
+});
+canvas.addEventListener('pointerdown', stopAiming);
+canvas.addEventListener('blur', stopAiming);
+// Tabbing onto the map starts the aim at once; a mouse click focusing it
+// does not (no :focus-visible).
+canvas.addEventListener('focus', () => {
+  if (!canvas.matches(':focus-visible')) return;
+  aiming = true;
+  paint();
 });
 
-viewport.attach(canvas, () => {
-  if (scene) drawScene(ctx, scene, canvas.clientWidth, canvas.clientHeight);
+viewport.attach(canvas, {
+  change: paint,
+  tap: (point) => {
+    if (scene) readout.textContent = readoutAt(scene, viewport, point);
+  },
+  key: () => {
+    aiming = true;
+  },
 });
 addEventListener('resize', render);
 render();

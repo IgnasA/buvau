@@ -43,7 +43,15 @@ micro dot back into the country's real shape.
 ## Readout line
 
 The single fixed line of text that names whatever country is under the
-cursor or finger. There is no tooltip.
+cursor or finger — or, when the keyboard is steering, under the aim mark.
+There is no tooltip.
+
+## Aim mark
+
+The small ring with four ticks at the map's center while the keyboard is
+steering it. It is the keyboard's cursor, not part of the drawing: it
+appears when the map is reached by Tab or moved by a key, and goes away
+at the first pointer or when focus leaves.
 
 ## Visited
 

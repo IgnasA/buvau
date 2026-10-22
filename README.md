@@ -47,13 +47,21 @@ There is no linter yet. The checks are:
 ```sh
 npm run typecheck  # tsc --noEmit (strict)
 npm run build      # vite build
-npm test           # build, then check vercel.json's CSP and security headers
+npm test           # build, then the node:test suites in test/ (map readout, CSP and security headers)
 ```
 
 The CSP in [vercel.json](vercel.json) allows the inline `<script>` and
 `<style>` in `index.html` by hash. If you edit either, `npm test` fails and
 prints the new hash to paste in. See
 [docs/SECURITY_REVIEW.md](docs/SECURITY_REVIEW.md).
+
+## Using the map
+
+Hover a country with the mouse, or tap it on a touchscreen, and the
+readout line under the map names it. From the keyboard, Tab onto the map:
+a small mark appears at its center, `+`/`−` zoom, the arrow keys pan, and
+the readout names the country under the mark (Escape resets the view).
+Double-click resets the zoom too.
 
 ## Deploy
 
